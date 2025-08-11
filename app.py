@@ -1,5 +1,4 @@
 import os
-import re
 import asyncio
 from flask import Flask, request, render_template, redirect, url_for
 from docx import Document
@@ -14,11 +13,6 @@ def read_txt(path: str) -> str:
 def read_docx(path: str) -> str:
     doc = Document(path)
     return "\n".join(par.text for par in doc.paragraphs)
-
-def split_into_chapters(text: str):
-    pattern = r'(?i)(?=cap[ií]tulo\s+\d+\b|chapter\s+\d+\b)'
-    chapters = re.split(pattern, text)
-    return [c.strip() for c in chapters if c.strip()]
 
 async def synthesize(text: str, out_path: str, voice: str = "es-ES-SergioNeural", style: str = "newscast-casual"):
     communicate = edge_tts.Communicate(text, voice=voice, style=style)
@@ -43,10 +37,9 @@ def index():
         else:
             return 'Formato no soportado', 400
 
-        chapters = split_into_chapters(text)
-        for idx, chapter in enumerate(chapters, start=1):
-            output_file = os.path.join(output_dir, f'capitulo_{idx}.mp3')
-            asyncio.run(synthesize(chapter, output_file))
+        base_name = os.path.splitext(file.filename)[0]
+        output_file = os.path.join(output_dir, f'{base_name}.mp3')
+        asyncio.run(synthesize(text, output_file))
 
         return redirect(url_for('exito', carpeta=output_dir))
 
