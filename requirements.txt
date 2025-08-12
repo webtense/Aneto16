@@ -1,0 +1,5 @@
+Flask>=2.3.2
+python-docx>=0.8.11
+edge-tts>=6.1.10
+pydub>=0.25.1
+textract>=1.6.5

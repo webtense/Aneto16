@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Convertir Libro a Audio</title>
+</head>
+<body>
+    <h1>Subir Libro</h1>
+    <form id="convertForm" method="POST" enctype="multipart/form-data">
+        <label>Archivo (TXT, DOCX o DOC):</label><br>
+        <input type="file" id="archivo" name="archivo" required><br><br>
+
+        <label>Voz:</label><br>
+        <label><input type="radio" name="voz" value="femenina" checked> Femenina</label>
+        <label><input type="radio" name="voz" value="masculina"> Masculina</label><br><br>
+
+        <label>Velocidad:</label><br>
+        <select name="velocidad">
+            <option value="normal" selected>Normal</option>
+            <option value="lenta">Lenta</option>
+            <option value="rapida">Rápida</option>
+        </select><br><br>
+
+        <label>Estilo de voz:</label><br>
+        <select name="estilo">
+            <option value="general" selected>Neutral</option>
+            <option value="narracion">Narración</option>
+            <option value="alegre">Alegre</option>
+        </select><br><br>
+
+        <label>Carpeta de salida:</label><br>
+        <input type="text" name="salida" placeholder="salidas"><br><br>
+        <button type="submit">Procesar</button>
+    </form>
+
+    <div id="progress" style="display:none;">
+        <p id="time"></p>
+        <progress id="bar" max="100" value="0" style="width:300px;"></progress>
+    </div>
+
+    <script>
+    const form = document.getElementById('convertForm');
+    form.addEventListener('submit', () => {
+        const file = document.getElementById('archivo').files[0];
+        if (!file) return;
+        const est = Math.max(5, Math.round(file.size / 1000 * 0.5));
+        document.getElementById('time').textContent = `Tiempo estimado: ${est} s`;
+        const progress = document.getElementById('progress');
+        const bar = document.getElementById('bar');
+        progress.style.display = 'block';
+        let elapsed = 0;
+        const interval = setInterval(() => {
+            elapsed++;
+            bar.value = Math.min(100, elapsed * 100 / est);
+            if (elapsed >= est) clearInterval(interval);
+        }, 1000);
+    });
+    </script>
+</body>
+</html>
