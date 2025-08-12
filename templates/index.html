@@ -10,6 +10,12 @@
         <label>Archivo (TXT, DOCX o DOC):</label><br>
         <input type="file" id="archivo" name="archivo" required><br><br>
 
+        <label>Idioma:</label><br>
+        <select name="idioma">
+            <option value="es" selected>Castellano</option>
+            <option value="ca">Catalán</option>
+        </select><br><br>
+
         <label>Voz:</label><br>
         <label><input type="radio" name="voz" value="femenina" checked> Femenina</label>
         <label><input type="radio" name="voz" value="masculina"> Masculina</label><br><br>
@@ -19,13 +25,6 @@
             <option value="normal" selected>Normal</option>
             <option value="lenta">Lenta</option>
             <option value="rapida">Rápida</option>
-        </select><br><br>
-
-        <label>Estilo de voz:</label><br>
-        <select name="estilo">
-            <option value="general" selected>Neutral</option>
-            <option value="narracion">Narración</option>
-            <option value="alegre">Alegre</option>
         </select><br><br>
 
         <label>Carpeta de salida:</label><br>

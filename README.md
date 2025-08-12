@@ -19,8 +19,8 @@ python app.py
 ```
 Luego abre `http://localhost:5000` en tu navegador y:
 1. Sube un archivo `.txt`, `.docx` o `.doc`.
-2. Elige voz **femenina** o **masculina**, la **velocidad** y el **estilo** (neutral, narración o alegre).
+2. Escoge el **idioma** (castellano o catalán), la **voz** (femenina o masculina) y la **velocidad** de lectura.
 3. Indica la carpeta donde se guardarán los MP3.
 4. Presiona **Procesar** y observa la barra de progreso con el tiempo estimado.
 
-El libro se divide en capítulos y se genera un archivo MP3 por cada uno en la carpeta indicada.
+El texto se divide en capítulos y cada uno se procesa en bloques de 200 líneas para evitar límites de peticiones. Se genera un archivo MP3 por capítulo en la carpeta indicada.

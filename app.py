@@ -32,7 +32,7 @@ def split_into_chapters(text: str) -> list[str]:
         chapters.append(text[start:end].strip())
     return chapters
 
-CHUNK_SIZE = 3000  # characters
+CHUNK_LINES = 200  # lines per request
 CHUNK_DELAY = 1    # seconds
 
 async def synthesize(
@@ -40,14 +40,13 @@ async def synthesize(
     out_path: str,
     voice: str = "es-ES-SergioNeural",
     rate: str = "0%",
-    style: str = "general",
 ):
-    chunks = [text[i : i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
+    lines = text.splitlines()
+    chunks = ["\n".join(lines[i:i + CHUNK_LINES]) for i in range(0, len(lines), CHUNK_LINES)]
     temp_files = []
     for idx, chunk in enumerate(chunks):
         temp_file = f"temp_{idx}.mp3"
-        style_arg = None if style == 'general' else style
-        communicate = edge_tts.Communicate(chunk, voice=voice, style=style_arg, rate=rate)
+        communicate = edge_tts.Communicate(chunk, voice=voice, rate=rate)
         await communicate.save(temp_file)
         temp_files.append(temp_file)
         await asyncio.sleep(CHUNK_DELAY)
@@ -58,12 +57,12 @@ async def synthesize(
         os.remove(f)
     audio.export(out_path, format="mp3")
 
-async def synthesize_book(text: str, out_dir: str, base: str, voice: str, rate: str, style: str) -> list[str]:
+async def synthesize_book(text: str, out_dir: str, base: str, voice: str, rate: str) -> list[str]:
     chapters = split_into_chapters(text)
     files = []
     for idx, chap in enumerate(chapters, start=1):
         out = os.path.join(out_dir, f"{base}_capitulo_{idx}.mp3")
-        await synthesize(chap, out, voice=voice, rate=rate, style=style)
+        await synthesize(chap, out, voice=voice, rate=rate)
         files.append(os.path.basename(out))
     return files
 
@@ -74,22 +73,19 @@ def index():
         output_dir = request.form.get('salida') or 'salidas'
         os.makedirs(output_dir, exist_ok=True)
         gender = request.form.get('voz', 'femenina')
-        speed = request.form.get('velocidad', '0')
-        style_sel = request.form.get('estilo', 'general')
+        language = request.form.get('idioma', 'es')
+        speed = request.form.get('velocidad', 'normal')
 
         voice_map = {
-            'femenina': 'es-ES-ElviraNeural',
-            'masculina': 'es-ES-SergioNeural',
+            ('es', 'femenina'): 'es-ES-ElviraNeural',
+            ('es', 'masculina'): 'es-ES-SergioNeural',
+            ('ca', 'femenina'): 'ca-ES-JoanaNeural',
+            ('ca', 'masculina'): 'ca-ES-EnricNeural',
         }
         rate_map = {
             'lenta': '-20%',
             'normal': '0%',
             'rapida': '+20%',
-        }
-        style_map = {
-            'general': 'general',
-            'narracion': 'narration-professional',
-            'alegre': 'cheerful',
         }
 
         temp_dir = 'tmp'
@@ -107,10 +103,9 @@ def index():
             return 'Formato no soportado', 400
 
         base_name = os.path.splitext(file.filename)[0]
-        voice_id = voice_map.get(gender, 'es-ES-ElviraNeural')
+        voice_id = voice_map.get((language, gender), 'es-ES-ElviraNeural')
         rate_val = rate_map.get(speed, '0%')
-        style_val = style_map.get(style_sel, 'general')
-        files = asyncio.run(synthesize_book(text, output_dir, base_name, voice_id, rate_val, style_val))
+        files = asyncio.run(synthesize_book(text, output_dir, base_name, voice_id, rate_val))
         return redirect(url_for('exito', carpeta=output_dir, archivos=','.join(files)))
 
     return render_template('index.html')
